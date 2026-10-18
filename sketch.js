@@ -1,209 +1,56 @@
 const OBJECTS = [];
 
-const L_SYSTEMS = {
-  // Bush from "The Algorithmic Beauty of Plants" (fig. 1.25)
-  tree: {
-    name: "tree",
-    axiom: "A",
-    rules: {
-      A: "[&FL!A]/////'[&FL!A]///////'[&FL!A]",
-      F: "S/////F",
-      S: "FL",
-    },
-    iterations: 5,
-    position: { x: 0, y: 300, z: 900 },
-    turtle: { angle: 22.5, radius: 12 },
-  },
-
-  // Stochastic bush: every F picks one of the successors at random,
-  // so each reset grows a different bush.
-  bush: {
-    name: "bush",
-    axiom: "[&F]///[&F]///[&F]///[&F]///[&F]",
-    rules: {
-      F: ["F[&+F]F[^-F]", "F[\\&F]/F", "F[/^F]F[&F]"],
-    },
-    iterations: 3,
-    position: { x: 0, y: 300, z: 900 },
-    turtle: {
-      angle: 30,
-      length: 40,
-      radius: 6,
-      radiusScale: 0.8,
-      palette: [["#2e7d32", "#43a047"]],
-    },
-  },
-
-  // Fractal plant: the stem doubles (F -> FF) while X keeps branching.
-  plant: {
-    name: "plant",
-    axiom: "X",
-    rules: {
-      X: "F[&+X]//[&-X]///F[^X]\\\\X",
-      F: "FF",
-    },
-    iterations: 4,
-    position: { x: 0, y: 300, z: 900 },
-    turtle: { angle: 22.5, length: 16, radius: 3 },
-  },
-
-  // Pine: whorls of 4 drooping branches, each level shorter and thinner.
-  pine: {
-    name: "pine",
-    axiom: "FA",
-    rules: {
-      A: "!FF[&&&&'B]///[&&&&'B]///[&&&&'B]///[&&&&'B]\"/A",
-      B: "F[+F][-F]B",
-    },
-    iterations: 9,
-    position: { x: 0, y: 200, z: 900 },
-    turtle: {
-      angle: 30,
-      length: 32,
-      radius: 10,
-      lengthScale: 0.85,
-      radiusScale: 0.8,
-    },
-  },
-
-  // 3D Hilbert curve (fig. 1.8), filling a cube centered on the screen.
-  hilbert: {
-    name: "hilbert",
-    axiom: "A",
-    rules: {
-      A: "B-F+CFC+F-D&F^D-F+&&CFC+F+B//",
-      B: "A&F^CFB^F^D^^-F-D^|F^B|FC^F^A//",
-      C: "|D^|F^B-F+C^F^A&&FA&F^C+F+B^F^D//",
-      D: "|CFB-F+B|FA&F^A&&FB-F+B|FC//",
-    },
-    iterations: 4,
-    position: { x: -140, y: 140, z: 760 },
-    turtle: { angle: 90, length: 100, radius: 5, sides: 4 },
-  },
-
-  // Seashell: a single helix whose steps (") and thickness (!) grow every
-  // turn (scales above 1), so it opens into a cone.
-  shell: {
-    name: "shell",
-    axiom: "A",
-    rules: {
-      A: "F+^\"!A",
-    },
-    iterations: 120,
-    position: { x: -94, y: 75, z: 950 },
-    turtle: {
-      angle: 12,
-      length: 6,
-      radius: 1.5,
-      lengthScale: 1.02,
-      radiusScale: 1.02,
-      palette: [["#f5deb3", "#d2b48c"]],
-    },
-  },
-
-  // 3D dragon curve: the classic X/Y dragon with every other fold pitched
-  // out of the plane.
-  dragon: {
-    name: "dragon",
-    axiom: "FX",
-    rules: {
-      X: "X+YF&",
-      Y: "^FX-Y",
-    },
-    iterations: 8,
-    position: { x: 162, y: 225, z: 950 },
-    turtle: {
-      angle: 90,
-      length: 18,
-      radius: 3,
-      sides: 4,
-      palette: [["#5e35b1", "#7e57c2"]],
-    },
-  },
-
-  // Roots: the turtle turns around (|) to grow downward, and each random
-  // split gets shorter and thinner.
-  roots: {
-    name: "roots",
-    axiom: "|A",
-    rules: {
-      A: ["F\"[&+!A][^-!A]", "F\"[\\&!A]/[^!A]A", "F/A"],
-    },
-    iterations: 7,
-    position: { x: 0, y: -170, z: 900 },
-    turtle: {
-      angle: 28,
-      length: 70,
-      radius: 12,
-      lengthScale: 0.85,
-      radiusScale: 0.75,
-    },
-  },
-
-  // Coral: three arms that fork three ways, alternating orange and pink.
-  coral: {
-    name: "coral",
-    axiom: "[A]///[&A]///[^A]",
-    rules: {
-      A: "F\"![&+'A]/[^-A]//[&A]",
-    },
-    iterations: 5,
-    position: { x: 0, y: 250, z: 900 },
-    turtle: {
-      angle: 35,
-      length: 80,
-      radius: 14,
-      lengthScale: 0.8,
-      radiusScale: 0.75,
-      palette: [["#ff7043", "#ff8a65"], ["#ec407a", "#f06292"]],
-    },
-  },
-
-  // Lightning: a zig-zag bolt striking down; each step adds one random kink
-  // or a thinner side bolt (B) that zig-zags on its own.
-  lightning: {
-    name: "lightning",
-    axiom: "|A",
-    rules: {
-      A: ["F+F-A", "F-F+A", "F&F^A", "F^F&A", "F[&+!B]A", "F[^-!B]A"],
-      B: ["F+F-B", "F-F+B", "F&F^B", "F"],
-    },
-    iterations: 20,
-    position: { x: 0, y: -300, z: 900 },
-    turtle: {
-      angle: 35,
-      length: 14,
-      radius: 4,
-      radiusScale: 0.6,
-      palette: [["#ffd600", "#fff59d"]],
-    },
-  },
-
-  // Vine: a stem that twists as it climbs, with a green leaf sprig every step.
-  vine: {
-    name: "vine",
-    axiom: "A",
-    rules: {
-      A: "F/[&&'L]//+A",
-      L: "F[+F][-F]",
-    },
-    iterations: 40,
-    position: { x: 0, y: 300, z: 900 },
-    turtle: { angle: 20, length: 14, radius: 4 },
-  },
-};
-
 const L_SYSTEM_NAMES = Object.keys(L_SYSTEMS);
 
 let toRenderLSystem = L_SYSTEMS.hilbert;
 let lSystemIndex = L_SYSTEM_NAMES.indexOf(toRenderLSystem.name);
 let lastAction = "start";
 
-// Clears every shape (which also undoes any camera movement, since the eye
-// controls move the shapes themselves) and draws `toRenderLSystem` again.
-function reset() {
+// The eye controls move the shapes, not a camera, so a rebuilt L-system would
+// jump back to where it started. The eye frame is an origin plus the tips of
+// the x, y and z unit vectors; it gets the same moves as the shapes, so it
+// always says where the untouched world now sits in front of the eye.
+const createEyeFrame = () => ({
+  pos: createVector(0, 0, 0),
+  points: [createVector(1, 0, 0), createVector(0, 1, 0), createVector(0, 0, 1)],
+
+  rotate(degree, a1, a2, reference) {
+    [this.pos, ...this.points].forEach((point) => {
+      const [v1, v2] = rotatePointAroundPoint(point, reference, degree, a1, a2);
+      point[a1] = v1;
+      point[a2] = v2;
+    });
+  },
+});
+
+let eyeFrame;
+
+// Moves `point` from untouched world coordinates to where the eye frame
+// says it is now.
+const placeInEyeFrame = (point) => {
+  const { pos: origin, points: [x, y, z] } = eyeFrame;
+  const placed = origin.copy();
+  placed.add(p5.Vector.sub(x, origin).mult(point.x));
+  placed.add(p5.Vector.sub(y, origin).mult(point.y));
+  placed.add(p5.Vector.sub(z, origin).mult(point.z));
+  point.set(placed);
+};
+
+// Clears every shape and draws `toRenderLSystem` again. With `keepEye` the
+// new shapes are moved to match the current camera; otherwise the camera
+// goes back to its start.
+function reset(keepEye = false) {
   OBJECTS.length = 0;
   renderLSystem(toRenderLSystem, OBJECTS);
+
+  if (!keepEye) {
+    eyeFrame = createEyeFrame();
+    return;
+  }
+  OBJECTS.forEach((object) => {
+    object.points.forEach(placeInEyeFrame);
+    placeInEyeFrame(object.pos);
+  });
 }
 
 // Moves `step` places through L_SYSTEMS (wrapping around both ends) and
@@ -216,15 +63,26 @@ function showLSystem(step) {
 }
 
 // Changes the current L-system's iteration count by `step` (never below 0)
-// and draws it again.
+// and draws it again, keeping the camera where it is.
 function changeIterations(step) {
   toRenderLSystem.iterations = Math.max(0, toRenderLSystem.iterations + step);
-  reset();
+  reset(true);
 }
+
+// Returns `color` ("#RGB", "#RRGGBB" or "#RRGGBBAA") as "#RRGGBBAA" with its
+// alpha moved by `step` (kept within 00..FF).
+const changeAlpha = (color, step) => {
+  let hex = color.slice(1);
+  if (hex.length === 3) hex = [...hex].map((digit) => digit + digit).join("");
+  const alpha = hex.length === 8 ? parseInt(hex.slice(6), 16) : 255;
+  const next = Math.min(255, Math.max(0, alpha + step));
+  return `#${hex.slice(0, 6)}${next.toString(16).padStart(2, "0").toUpperCase()}`;
+};
 
 // Turtle options that can be changed live. The first key lowers the value,
 // the second raises it; `change` gets the current value and the direction
-// (-1 or 1) and returns the new value.
+// (-1 or 1) and returns the new value. A control with `apply` only restyles
+// the shapes already drawn, so the L-system is not grown again.
 const TURTLE_CONTROLS = [
   {
     option: "angle",
@@ -262,6 +120,13 @@ const TURTLE_CONTROLS = [
     keys: [",", "."],
     change: (value, direction) => Math.max(0.05, value + direction * 0.05),
   },
+  {
+    option: "strokeColor",
+    label: "stroke opacity",
+    keys: ["[", "]"],
+    change: (value, direction) => changeAlpha(value, direction * 0x11),
+    apply: (object, value) => object.strokeColor = value,
+  },
 ];
 
 const CAMERA_CONTROLS = [
@@ -276,15 +141,24 @@ const CAMERA_CONTROLS = [
 const turtleOption = (config, option) =>
   config.turtle?.[option] ?? TURTLE_DEFAULTS[option];
 
-const formatValue = (value) =>
-  Number.isInteger(value) ? String(value) : value.toFixed(2);
+const formatValue = (value) => {
+  if (typeof value === "string") return value;
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
+};
 
-// Changes one turtle option of the current L-system and draws it again.
+// Changes one turtle option of the current L-system and draws it again,
+// keeping the camera where it is.
 function changeTurtleOption(control, direction) {
   const current = turtleOption(toRenderLSystem, control.option);
+  const value = control.change(current, direction);
   toRenderLSystem.turtle = toRenderLSystem.turtle ?? {};
-  toRenderLSystem.turtle[control.option] = control.change(current, direction);
-  reset();
+  toRenderLSystem.turtle[control.option] = value;
+
+  if (control.apply) {
+    OBJECTS.forEach((object) => control.apply(object, value));
+  } else {
+    reset(true);
+  }
 }
 
 // Draws a table with a title row and a header row. (x, y) is its bottom-left
@@ -306,8 +180,6 @@ function drawTable(title, rows, x, y, alignRight = false) {
   const top = y - tableHeight;
 
   stroke(0, 40);
-  fill(255, 255, 255, 210);
-  rect(left, top, tableWidth, tableHeight, 6);
   line(
     left + padding,
     top + padding + rowHeight * 2 - 3,
@@ -333,6 +205,17 @@ function drawTable(title, rows, x, y, alignRight = false) {
   });
 }
 
+// frameRate() changes every frame, so the shown value is only refreshed
+// twice a second to stay readable.
+let shownFps = 0;
+let fpsUpdatedAt = 0;
+
+function updateFps() {
+  if (millis() - fpsUpdatedAt < 500) return;
+  shownFps = Math.round(frameRate());
+  fpsUpdatedAt = millis();
+}
+
 function drawStatus() {
   const position = `${lSystemIndex + 1}/${L_SYSTEM_NAMES.length}`;
 
@@ -350,6 +233,13 @@ function drawStatus() {
   textSize(14);
   fill(60);
   text(`${position} · last action: ${lastAction}`, width / 2, 50);
+
+  // shape count and frame rate in the top-right corner
+  updateFps();
+  textAlign(RIGHT, TOP);
+  fill(0);
+  text(`shapes: ${OBJECTS.length}`, width - 16, 16);
+  text(`fps: ${shownFps}`, width - 16, 36);
 
   const lSystemRows = [
     ["Keys", "Action", "Value"],
@@ -386,6 +276,7 @@ function draw() {
   background(205);
 
   eyeCallbacks(OBJECTS);
+  eyeCallbacks([eyeFrame]);
 
   renderObjects(OBJECTS);
 

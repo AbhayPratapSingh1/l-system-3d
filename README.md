@@ -158,7 +158,7 @@ In the stochastic rules above, `  |  ` separates the choices. A `|` with no spac
 
 ## Keyboard mappings
 
-Keys are case-insensitive. The L-system keys act once per key press and redraw the scene. The camera keys act every frame while you hold them down. The on-screen HUD shows the current L-system, the last action and the current value of every setting.
+Keys are case-insensitive. The L-system keys act once per key press and redraw the scene. The camera keys act every frame while you hold them down. The on-screen HUD shows the current L-system, the last action and the current value of every setting, plus the shape count and frame rate in the top-right corner.
 
 ### L-system
 
@@ -173,6 +173,7 @@ Keys are case-insensitive. The L-system keys act once per key press and redraw t
 | `G` / `H` | fewer / more branch sides      |
 | `V` / `B` | less / more length scale (`"`) |
 | `,` / `.` | less / more radius scale (`!`) |
+| `[` / `]` | less / more stroke opacity     |
 
 How much each key press changes a setting:
 
@@ -185,6 +186,7 @@ How much each key press changes a setting:
 | branch sides  | `G` / `H` | ±1                       | min 3     |
 | length scale  | `V` / `B` | ±0.05                    | min 0.05  |
 | radius scale  | `,` / `.` | ±0.05                    | min 0.05  |
+| stroke opacity| `[` / `]` | ±0x11 alpha              | 00 – FF   |
 
 Changes are kept per L-system while the page is open. Switching away and back keeps your tweaks, and reloading the page restores the defaults. High iteration counts grow exponentially and can make the page slow.
 
@@ -200,7 +202,7 @@ Changes are kept per L-system while the page is open. Switching away and back ke
 | `Q` / `E` | move forward / back (10 px per frame) |
 | `-` / `=` | zoom out / in (10 px per frame)       |
 
-The eye never actually moves. The camera keys move and rotate every shape around the origin instead, which is why `R` also resets the camera.
+The eye never actually moves. The camera keys move and rotate every shape around the origin instead, which is why `R` also resets the camera. Changing iterations or a turtle setting keeps the camera where it is, while `R` and switching L-systems (`N` / `M`) put it back at its start. The stroke opacity keys only restyle the shapes already drawn, so a random L-system keeps its shape.
 
 ## Turtle symbols
 
@@ -234,10 +236,10 @@ Then open the URL it prints. p5.js is loaded from a CDN. `npm install` is only n
 
 ## Adding your own L-system
 
-Add an entry to `L_SYSTEMS` in `sketch.js`:
+Create a file in `l-systems/`, e.g. `l-systems/fern.js`:
 
 ```js
-fern: {
+L_SYSTEMS.fern = {
   name: "fern",
   axiom: "X",
   rules: {
@@ -247,8 +249,16 @@ fern: {
   iterations: 4,
   position: { x: 0, y: 300, z: 900 },     // where the turtle starts
   turtle: { angle: 25, length: 20, radius: 4 }, // any Turtle option
-},
+};
 ```
+
+Then load it in `index.html`, after `lsystem.js` and before `sketch.js`:
+
+```html
+<script src="l-systems/fern.js"></script>
+```
+
+The order of these script tags is the order N / M cycles through.
 
 ### Turtle options
 
@@ -263,13 +273,15 @@ Turtle options and their defaults (see `TURTLE_DEFAULTS` in `turtle.js`):
 | `lengthScale` | `0.9`                        |
 | `radiusScale` | `0.7`                        |
 | `palette`     | brown and green color pairs  |
-| `strokeColor` | `"#000"`                     |
+| `strokeColor` | `CONFIG.strokeColor` (`config.js`) |
 
 ## Project structure
 
 ```
 index.html          entry point, loads p5.js and the scripts in order
-sketch.js           L-system configs, keyboard controls, HUD, p5 setup/draw
+config.js           shared settings (stroke color)
+l-systems/*.js      one L-system config per file, each adds itself to L_SYSTEMS
+sketch.js           keyboard controls, HUD, p5 setup/draw
 lsystem.js          LSystem grammar rewriting + symbol → turtle command map
 turtle.js           3D turtle (H/L/U orientation frame) that emits cylinders
 src/render.js       3D → 2D pipeline: clip, back-face cull, depth sort, project

@@ -21,7 +21,7 @@ class Cylinder {
     length,
     sides = 8,
     color = WORLD_ITEMS.palettes,
-    strokeColor = "#000",
+    strokeColor = CONFIG.strokeColor,
   ) {
     this.pos = createVector(x, y, z);
     this.h = h;

@@ -27,7 +27,7 @@ const TURTLE_DEFAULTS = {
     ["#5b3a1e", "#6e4826"],
     ["#2e7d32", "#43a047"],
   ],
-  strokeColor: "#000",
+  strokeColor: CONFIG.strokeColor,
 };
 
 // Rotates `a` toward `b` by `degree` inside the plane they span.

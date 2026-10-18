@@ -99,3 +99,8 @@ const renderLSystem = (config, shapes) => {
   runTurtle(turtle, sentence);
   return turtle;
 };
+
+// Every L-system config, keyed by name. Each file in l-systems/ adds one
+// entry (L_SYSTEMS.tree = {...}); the order of their <script> tags in
+// index.html is the order N / M cycles through.
+const L_SYSTEMS = {};
